@@ -1,0 +1,9 @@
+{
+  "name": "ProgressionSkills",
+  "version_number": "0.3.0",
+  "website_url": "https://github.com/Algirdyz/ProgressionSkills",
+  "description": "Combat skills are capped by the bosses you've defeated. No skill loss on death.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
