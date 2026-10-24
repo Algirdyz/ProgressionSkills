@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- merge ServerSync into the plugin dll -->
+  <Target Name="ILRepacker" AfterTargets="Build">
+    <ItemGroup>
+      <InputAssemblies Include="$(TargetPath)" />
+      <InputAssemblies Include="$(MSBuildProjectDirectory)/lib/ServerSync.dll" />
+      <LibraryPaths Include="$(ManagedPath)" />
+      <LibraryPaths Include="@(ReferencePath->'%(RootDir)%(Directory)')" />
+    </ItemGroup>
+    <ILRepack
+      Parallel="true"
+      DebugInfo="false"
+      Internalize="true"
+      InputAssemblies="@(InputAssemblies)"
+      LibraryPath="@(LibraryPaths)"
+      TargetKind="Dll"
+      OutputFile="$(TargetPath)" />
+  </Target>
+</Project>

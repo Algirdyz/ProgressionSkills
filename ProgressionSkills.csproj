@@ -1,0 +1,85 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>ProgressionSkills</AssemblyName>
+    <Version>0.3.0</Version>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <!-- dotnet build -p:GamePath=/path/to/Valheim -->
+  <PropertyGroup>
+    <GamePath Condition="'$(GamePath)' == ''">$(HOME)/.local/share/Steam/steamapps/common/Valheim</GamePath>
+    <ServerPath Condition="'$(ServerPath)' == ''">$(HOME)/.local/share/Steam/steamapps/common/Valheim dedicated server</ServerPath>
+    <ManagedPath>$(GamePath)/valheim_Data/Managed</ManagedPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.48" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="assembly_valheim" Publicize="true">
+      <HintPath>$(ManagedPath)/assembly_valheim.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_utils">
+      <HintPath>$(ManagedPath)/assembly_utils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_guiutils" Publicize="true">
+      <HintPath>$(ManagedPath)/assembly_guiutils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ManagedPath)/UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ManagedPath)/UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedPath)/UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedPath)/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ServerSync">
+      <HintPath>lib/ServerSync.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- version comes from <Version> above -->
+  <Target Name="GeneratePluginVersion" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <PluginVersionFile>$(IntermediateOutputPath)PluginVersion.g.cs</PluginVersionFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(PluginVersionFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="namespace ProgressionSkills { internal static class PluginVersion { public const string Value = &quot;$(Version)&quot;%3B } }" />
+    <ItemGroup>
+      <Compile Include="$(PluginVersionFile)" />
+      <FileWrites Include="$(PluginVersionFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- after ILRepack so the merged dll gets copied -->
+  <Target Name="CopyToPlugins" AfterTargets="ILRepacker">
+    <Warning Condition="!Exists('$(GamePath)/BepInEx')" Text="BepInEx not found in $(GamePath), not copying the dll" />
+    <MakeDir Condition="Exists('$(GamePath)/BepInEx')" Directories="$(GamePath)/BepInEx/plugins" />
+    <Copy Condition="Exists('$(GamePath)/BepInEx')" SourceFiles="$(TargetPath)" DestinationFolder="$(GamePath)/BepInEx/plugins" />
+    <MakeDir Condition="Exists('$(ServerPath)/BepInEx')" Directories="$(ServerPath)/BepInEx/plugins" />
+    <Copy Condition="Exists('$(ServerPath)/BepInEx')" SourceFiles="$(TargetPath)" DestinationFolder="$(ServerPath)/BepInEx/plugins" />
+  </Target>
+
+</Project>
